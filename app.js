@@ -1,5 +1,10 @@
 // Shove all cards from all decks into flipcards.
 flipcards = [];
+for (let i = 0; i < ethereum_cards.length; i++) {
+    const card = ethereum_cards[i];
+    card.deck = "ethereum";
+    flipcards.push(card);
+}
 for (let i = 0; i < aws_cards.length; i++) {
     const card = aws_cards[i];
     card.deck = "aws";
@@ -27,6 +32,10 @@ let sessionIdForDuplicateDetection = null;
 
 const get = function (id) {
     return document.getElementById(id);
+};
+
+const getByClass = function (className) {
+    return Array.from(document.getElementsByClassName(className));
 };
 
 const disableButtons = function () {
@@ -350,6 +359,7 @@ const initializeUserSession = function () {
         aws: Number.POSITIVE_INFINITY,
         azure: Number.POSITIVE_INFINITY,
         gcp: Number.POSITIVE_INFINITY,
+        ethereum: Number.POSITIVE_INFINITY
     };
     for (let i = 0; i < flipcards.length; i++) {
         const c = flipcards[i];
@@ -365,7 +375,7 @@ const initializeUserSession = function () {
         }
     }
     // Deal with special case where new cards are added after old cards have drifted far away in userData prios.
-    ["aws", "azure", "gcp"].forEach((deck) => {
+    ["aws", "azure", "gcp", "ethereum"].forEach((deck) => {
         const minPrioInUserData = minPriosInUserData[deck];
         if (minPrioInUserData - PRIO_INITIAL > PRIO_INCREASE_LATER && minPrioInUserData < PRIO_INCREASE_NEVER) {
             for (let i = 0; i < flipcards.length; i++) {
@@ -482,6 +492,9 @@ const renderRealCard = function () {
 
     // Potemkin card contents should be hidden as soon as we get real card on top of it.
     get("potemkin-card-front-container").style.visibility = "hidden";
+
+    // Add deck logo on the left top of the card.
+    getByClass("cloud-provider-on-card").forEach(element => element.src = 'assets/logo_' + currentDeck + '.svg')
 };
 
 const deckSelectionOpen = function () {
@@ -496,13 +509,20 @@ const deckSelectionOpen = function () {
         get("deck-option-aws").style.pointerEvents = "auto";
     }, 400);
     get("cloud-provider-on-deck-aws").style.visibility = "visible";
+    // ethereum deck option
+    get("deck-option-ethereum").style.top = "85px";
+    get("deck-option-ethereum").style.visibility = "visible";
+    get("cloud-provider-on-deck-ethereum").style.visibility = "visible";
+    window.setTimeout(() => {
+        get("deck-option-ethereum").style.pointerEvents = "auto";
+    }, 400);
     // azure deck option
-    get("deck-option-azure").style.top = "85px";
+    get("deck-option-azure").style.top = "170px";
     get("deck-option-azure").style.visibility = "visible";
     get("cloud-provider-on-deck-azure").style.visibility = "visible";
     get("coming-soon-text-azure").style.visibility = "visible";
     // gcp deck option
-    get("deck-option-gcp").style.top = "170px";
+    get("deck-option-gcp").style.top = "255px";
     get("deck-option-gcp").style.visibility = "visible";
     get("cloud-provider-on-deck-gcp").style.visibility = "visible";
     get("coming-soon-text-gcp").style.visibility = "visible";
@@ -526,6 +546,11 @@ const deckSelectionClose = function (choice) {
     get("deck-option-aws").style.visibility = "hidden"; /* 0.4s transition */
     get("deck-option-aws").style.pointerEvents = "none";
     get("cloud-provider-on-deck-aws").style.visibility = "hidden"; /* 0s transition */
+    // animate ethereum deck option
+    get("deck-option-ethereum").style.top = "-85px"; /* 0.4s transition */
+    get("deck-option-ethereum").style.visibility = "hidden"; /* 0.4s transition */
+    get("deck-option-ethereum").style.pointerEvents = "none";
+    get("cloud-provider-on-deck-ethereum").style.visibility = "hidden"; /* 0s transition */
     // animate azure deck option
     get("deck-option-azure").style.top = "-85px"; /* 0.4s transition */
     get("deck-option-azure").style.visibility = "hidden"; /* 0.4s transition */
